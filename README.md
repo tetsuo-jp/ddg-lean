@@ -55,6 +55,29 @@ quarter turns cancel because the ring closes.
 
 Also classical (Pinkall–Polthier, Duffin, MacNeal, Wardetzky et al.).
 
+## 3. A forest of interior vertices suffices for a positive Laplacian
+
+Wardetzky et al. show that not every mesh admits an operator that is at once
+symmetric, local, linearly precise and positively weighted.  A sufficient
+condition for one to exist is that the **interior vertices span a forest**:
+
+```lean
+theorem exists_good_weights {P : V → E} {N : V → Finset V}
+    (B : Bary P N) (F : RootedForest V) :
+    ∃ w : V → V → ℝ, (∀ u j, j ∈ N u → 0 < w u j) ∧ …
+```
+
+Each interior vertex lies inside the convex hull of its neighbours, so it has
+positive barycentric coefficients; those are chosen one vertex at a time and
+disagree on interior edges.  The whole content is that the disagreement can be
+repaired by rescaling, and that a forest is exactly what makes the rescaling
+consistent, since a cycle would impose a closing condition.
+
+⚠ The forest hypothesis is taken in **rooted** form, and the geometric fact
+supplying the barycentric data is assumed rather than derived.  See
+`formalization-forest.yaml` for the full list of gaps.  **No priority is
+claimed**: the argument is elementary and may well be folklore.
+
 ## Layout
 
 | file | contents |
@@ -65,7 +88,8 @@ Also classical (Pinkall–Polthier, Duffin, MacNeal, Wardetzky et al.).
 | `comparator.json`, `comparator-cotan.json` | the theorem names compared by [Comparator](https://github.com/leanprover/comparator) |
 | `formalization.yaml`, `formalization-cotan.yaml` | Palomar metadata, schema v0.4 |
 | `scripts/audit.sh` | the five trust conditions for both entries, fails closed |
-| `scripts/mutation_test.py`, `scripts/mutation_test_cotan.py` | check that hypotheses and constants are load-bearing |
+| `ForestChallenge.lean` / `ForestSolution.lean` | entry 3: the forest condition |
+| `scripts/mutation_test*.py` | check that hypotheses and constants are load-bearing |
 
 ## A note on `ring`
 
@@ -95,9 +119,9 @@ Lean `v4.31.0`, Mathlib pinned in `lake-manifest.json`.
 3. No `sorry`, `native_decide`, `unsafe` or project-defined `axiom` in either
    solution module; exactly four deliberate `sorry` holes in each challenge.
 4. The claimed theorems appear in both modules of each pair.
-5. **Mutation test**: twenty-four single-token changes to the structures'
+5. **Mutation test**: thirty-three single-token changes to the structures'
    fields and to the constants in the claimed statements each break the build,
-   and three harmless edits do not.
+   and four harmless edits do not.
 
 The mutation scripts are crash-safe: they copy the source aside before the
 first mutation, restore it on every exit path including `SIGTERM`, and recover

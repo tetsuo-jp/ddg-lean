@@ -1,0 +1,152 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "A forest of interior vertices suffices for a positive discrete Laplacian"
+  description: >-
+    Wardetzky, Mathur, Kalberer and Grinspun prove that not every triangle mesh
+    admits a discrete Laplace operator that is simultaneously symmetric (SYM),
+    local (LOC), linearly precise (LIN) and positively weighted (POS).  This
+    development formalises a sufficient condition for one to exist: it is enough
+    that the interior vertices span a forest.
+
+    The geometric input is that each interior vertex lies in the interior of the
+    convex hull of its neighbours, so there are positive coefficients balancing
+    it; that appears as the structure Bary.  Such coefficients are chosen one
+    vertex at a time and generally disagree on an edge joining two interior
+    vertices.  The content of the theorem is that the disagreement can be
+    repaired by rescaling each vertex's coefficients, and that a forest is
+    exactly what makes the rescaling consistent: on a tree the scale propagates
+    from the root outwards, while a cycle would impose a closing condition.
+
+    One theorem is claimed, exists_good_weights.  The weights are existentially
+    quantified in it, so the statement mentions only the two structures.
+  authors:
+    - "Tetsuo Yokoyama"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Tetsuo Yokoyama"
+
+classification:
+  arxiv: ["math.NA", "math.CO"]
+  msc2020: ["53A70", "65N30", "05C05", "52B70"]
+
+sources:
+  - title: >-
+      A forest of interior vertices suffices for a symmetric, local, linearly
+      precise, positively weighted discrete Laplacian
+    type: original-proof
+    relationship: other
+    note: >-
+      The statement and proof were produced for this development.  The argument
+      is elementary (positive barycentric coefficients at each vertex, rescaled
+      along the trees of the interior graph), and the author considers it likely
+      to be folklore.  Searches of the obvious phrasings returned nothing
+      directly on point, but no thorough novelty check was performed and NO
+      CLAIM OF PRIORITY IS MADE.  A reader who knows a reference is asked to
+      treat this entry as a formalization of that reference.
+
+  - title: "Discrete Laplace operators: no free lunch"
+    authors:
+      - "Max Wardetzky"
+      - "Saurabh Mathur"
+      - "Felix Kalberer"
+      - "Eitan Grinspun"
+    type: "article"
+    location: "Symposium on Geometry Processing (2007) 33-37"
+    relationship: background
+    license: "unknown"
+    author_endorsement: "not-contacted"
+    note: >-
+      The source of the four properties (SYM), (LOC), (LIN), (POS) and of the
+      impossibility result that this condition complements.  Their obstruction
+      is non-regularity of the triangulation; the condition proved here is
+      combinatorial and sufficient, not a characterisation.
+
+related_formalizations: []
+
+status:
+  scope: >-
+    Formalized: given barycentric data (Bary) and a rooted forest structure
+    (RootedForest) on the vertex type, there exist weights that are positive on
+    every neighbour, balance every vertex, have positive row sums, and agree
+    from both ends of every forest edge.
+
+    Not formalized, and important for a reader to know.  (1) The forest
+    hypothesis is taken in rooted form.  Every finite forest admits such a
+    structure, by picking a root in each component and letting the rank be the
+    distance to it, but that step is standard graph theory and is not proved
+    here.  (2) The geometric fact that an interior vertex of a triangulation
+    lies in the interior of the convex hull of its neighbours, which is what
+    supplies Bary, is assumed rather than derived: no triangulation, convex
+    hull, or planarity appears in this development.  (3) Nothing here converts
+    the conclusion into a matrix, so (SYM) is stated as the agreement of the two
+    ends of an interior edge rather than as symmetry of an assembled operator,
+    and (LOC) holds by construction because the weights are indexed by
+    neighbours.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["Claude Opus 5 (Anthropic)"]
+      framework: "Claude Code"
+      tool_setup: >-
+        The agent found the statement while looking for a proof of a lower bound
+        that did not depend on an SMT solver, tested it numerically on 2482
+        forest instances and 4560 instances with a cycle, implemented the
+        construction in exact rational arithmetic and checked 300 instances, and
+        then wrote this Lean development.
+      cost:
+        wall_time: "about three hours of elapsed session time, including the numerical work"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: >-
+        The statement was written down as a prediction before it was tested, and
+        the numerical test was run with a declared falsification condition (a
+        forest instance that is infeasible would refute the construction).  None
+        appeared.
+  spend_usd: "subscription-based"
+  notes: >-
+    Human-directed, machine-written.  Every proof step is checked by Lean.
+    scripts/audit.sh enforces the trust conditions and fails closed, and
+    scripts/mutation_test_forest.py checks that the hypotheses and the
+    construction are load-bearing: nine mutations each break the build and one
+    harmless edit does not.
+
+fidelity:
+  divergences: >-
+    See status.scope for the three gaps between the informal statement ("a
+    forest of interior vertices suffices") and the formal one.  The rooted form
+    of the forest hypothesis is the significant one.
+
+    One point about the mutation test.  Reversing the rank inequality in
+    RootedForest breaks the build, but that shows only that the proof uses the
+    direction: a forest rooted the other way is still a forest, so the theorem
+    itself would survive.  The mutation test answers "does the proof use this?"
+    and not "does the statement need this?", and the two differ here.
+
+review:
+  status: self-assessed
+  reviewers:
+    - "Tetsuo Yokoyama"
+  notes: >-
+    No external or independent review has been performed.  The statement was
+    tested numerically before formalization and probed by the mutation test.
+
+alignment:
+  namespace: "LapForest"
+  statements:
+    - source: "A forest of interior vertices suffices"
+      lean: "LapForest.exists_good_weights"
+      module: "ForestSolution"
+      status: proved
+      note: >-
+        The four conclusions are (POS), (LIN), the nondegeneracy of Wardetzky et
+        al., and (SYM) across interior edges.
+
+acknowledgements: >-
+  Lean 4 and Mathlib, and the Lean FRO's Comparator, on which the mechanical
+  checks in this repository depend.

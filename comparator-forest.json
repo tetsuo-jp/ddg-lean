@@ -1,0 +1,8 @@
+{
+  "challenge_module": "ForestChallenge",
+  "solution_module": "ForestSolution",
+  "theorem_names": [
+    "LapForest.exists_good_weights"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+}

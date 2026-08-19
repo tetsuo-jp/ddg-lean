@@ -24,3 +24,12 @@ name = "CotanAudit"
 
 [[lean_lib]]
 name = "CotanChallenge"
+
+[[lean_lib]]
+name = "ForestSolution"
+
+[[lean_lib]]
+name = "ForestAudit"
+
+[[lean_lib]]
+name = "ForestChallenge"
