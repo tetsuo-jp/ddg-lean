@@ -1,0 +1,11 @@
+{
+  "challenge_module": "CotanChallenge",
+  "solution_module": "CotanSolution",
+  "theorem_names": [
+    "Cotan.gram_two",
+    "Cotan.inner_form",
+    "Cotan.cot_angle_mul_abs_cross",
+    "Cotan.cotan_form"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+}

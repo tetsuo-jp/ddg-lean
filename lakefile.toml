@@ -15,3 +15,12 @@ name = "Solution"
 
 [[lean_lib]]
 name = "Audit"
+
+[[lean_lib]]
+name = "CotanSolution"
+
+[[lean_lib]]
+name = "CotanAudit"
+
+[[lean_lib]]
+name = "CotanChallenge"

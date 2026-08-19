@@ -1,0 +1,172 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "The cotangent formula for the Dirichlet energy of a triangle"
+  description: >-
+    For a triangle in the Euclidean plane and an affine function on it, the
+    Dirichlet energy 2A * ‖∇u‖^2 equals the sum over the three vertices of
+    cot θₖ * (uᵢ - uⱼ)^2, where θₖ is the interior angle at vertex k and
+    uᵢ - uⱼ is the jump of u across the opposite edge.  This is the identity
+    behind the cotangent Laplacian of discrete differential geometry.
+
+    Four results are claimed.  gram_two is the geometric core: the Gram matrix
+    of three vectors of the plane is singular.  inner_form is the cotangent
+    identity with each "cot θₖ * 2A" replaced by the inner product of the two
+    edges at vertex k, and needs no hypotheses at all.
+    cot_angle_mul_abs_cross is the conversion between the two.  cotan_form is
+    the cotangent statement itself, for a nondegenerate triangle.
+  authors:
+    - "Tetsuo Yokoyama"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Tetsuo Yokoyama"
+
+classification:
+  arxiv: ["math.MG", "math.NA"]
+  msc2020: ["53A70", "65N30", "52B70"]
+
+sources:
+  - title: "Computing Discrete Minimal Surfaces and Their Conjugates"
+    authors:
+      - "Ulrich Pinkall"
+      - "Konrad Polthier"
+    id: "doi:10.1080/10586458.1993.10504266"
+    type: "article"
+    location: "Experimental Mathematics 2 (1993) 15–36"
+    relationship: independently-proves
+    license: "unknown"
+    author_endorsement: "not-contacted"
+    note: >-
+      The standard reference for the cotangent formula in discrete differential
+      geometry.  The Lean proof here was written directly rather than by
+      following any written argument, so the relationship is
+      independently-proves; the result is classical and no novelty is claimed.
+
+  - title: "Distributed and Lumped Networks"
+    authors:
+      - "Richard J. Duffin"
+    id: "doi:10.1512/iumj.1959.8.58051"
+    type: "article"
+    relationship: background
+    license: "unknown"
+    author_endorsement: "n/a"
+    note: "An early appearance of the cotangent weights, in a network setting."
+
+  - title: "An asymmetrical finite difference network"
+    authors:
+      - "Richard H. MacNeal"
+    id: "doi:10.1090/qam/99978"
+    type: "article"
+    relationship: background
+    license: "unknown"
+    author_endorsement: "n/a"
+    note: "An earlier appearance of the same weights in numerical analysis."
+
+related_formalizations: []
+
+status:
+  scope: >-
+    Formalized: the four statements listed in the description, for triangles in
+    EuclideanSpace ℝ (Fin 2).
+
+    Not formalized: any connection to integration.  The gradient is not
+    constructed and no integral is taken.  The vector g in the statements is
+    constrained only by the inner products ⟪g, eₖ⟫ appearing in them; it is the
+    gradient of the affine interpolant exactly when those equal the vertex-value
+    differences, but that correspondence is asserted in prose here, not proved.
+    Consequently the "Dirichlet energy" reading of the identity is an
+    interpretation supplied by the reader, and the Lean content is the algebraic
+    identity.  Only the plane is treated; triangles in R^3 are not.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["Claude Opus 5 (Anthropic)"]
+      framework: "Claude Code"
+      tool_setup: >-
+        The agent wrote the Lean source and the mutation script, iterating
+        against `lake build`.  The identity was checked numerically on 20000
+        random triangles before any Lean was written, together with a
+        deliberately corrupted variant to confirm the numerical check could
+        detect an error.
+      cost:
+        wall_time: "about two hours of elapsed session time"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: >-
+        The one substantive intervention was about proof engineering rather
+        than mathematics: expanding the inner products into coordinates and
+        calling `ring` costs 262 s and 5 GB and did not finish within ten
+        minutes for the three-point statement, so the development was rewritten
+        to keep the inner products opaque and give `ring` only the Lagrange and
+        Binet–Cauchy identities.  The module then builds in 14 s.
+  spend_usd: "subscription-based"
+  notes: >-
+    Human-directed, machine-written.  Every proof step is checked by Lean.
+    scripts/audit.sh enforces the trust conditions and fails closed, and
+    scripts/mutation_test_cotan.py checks that the constants and definitions in
+    the claimed statements are load-bearing: nine mutations each break the
+    build and one harmless edit does not.
+
+fidelity:
+  divergences: >-
+    The cited source states the formula as an identity about the Dirichlet
+    integral of a piecewise linear function on a triangulated surface.  This
+    development proves the algebraic identity for a single triangle, with the
+    gradient entering only through the inner products ⟪g, eₖ⟫ and no integral
+    taken.  See status.scope.
+
+    One further point a reviewer should know.  The hypothesis `sarea2 p ≠ 0`
+    of `cotan_form` is not needed for the Lean statement to be true: at a
+    degenerate triangle every interior angle is 0, π or π/2, and `Real.cot` is
+    0 at all three because Lean defines `x / 0 = 0`.  Both sides are then 0.
+    The hypothesis is kept deliberately, because without it the degenerate case
+    asserts a junk value rather than a fact about triangles.  The mutation test
+    shows only that the proof uses the hypothesis, not that the statement needs
+    it; this note records the difference.
+
+review:
+  status: self-assessed
+  reviewers:
+    - "Tetsuo Yokoyama"
+  notes: >-
+    No external or independent review has been performed.  The statements were
+    read for fidelity by the author, checked numerically before formalization,
+    and probed by the mutation test.  Every proof step is checked by Lean.
+
+alignment:
+  namespace: "Cotan"
+  statements:
+    - source: "Singularity of the Gram matrix of three plane vectors"
+      lean: "Cotan.gram_two"
+      module: "CotanSolution"
+      status: proved
+      note: "The geometric core; everything else is bookkeeping around it."
+    - source: "Pinkall–Polthier 1993, cotangent formula (inner-product form)"
+      lean: "Cotan.inner_form"
+      module: "CotanSolution"
+      status: adapted
+      note: >-
+        The identity with cot θₖ * 2A replaced by the inner product of the two
+        edges at vertex k.  Holds with no hypotheses, including for degenerate
+        triangles.
+    - source: "cot θ * 2A = inner product of the spanning edges"
+      lean: "Cotan.cot_angle_mul_abs_cross"
+      module: "CotanSolution"
+      status: proved
+      note: "The conversion between the inner-product and cotangent forms."
+    - source: "Pinkall–Polthier 1993, cotangent formula"
+      lean: "Cotan.cotan_form"
+      module: "CotanSolution"
+      status: adapted
+      note: >-
+        The cotangent statement for a nondegenerate plane triangle, without the
+        integral of the cited source.  See fidelity.divergences.
+
+acknowledgements: >-
+  Lean 4 and Mathlib, and the Lean FRO's Comparator, on which the mechanical
+  checks in this repository depend.
