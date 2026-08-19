@@ -1,0 +1,125 @@
+version: "0.3"
+
+project:
+  name: "Discrete Gauss–Bonnet for closed triangulated surfaces"
+  authors:
+    - name: "Tetsuo Yokoyama"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - name: "Tetsuo Yokoyama"
+
+repository:
+  role: substantive-development
+
+classification:
+  arxiv: [math.MG, math.CO]
+  msc2020: ["53A70", "52B70", "52B05", "05C10"]
+
+status: complete
+fidelity: faithful
+scope: >-
+  The combinatorial form of the theorem, in full generality for the structure
+  defined here: for any finite closed triangulated surface with angle data, the
+  sum over vertices of the angle defect equals 2*pi times the Euler
+  characteristic #V - #E + #F. The tetrahedron (4*pi) is derived as an
+  instance, together with the fact that four triangular faces force six edges.
+  The relation 3*#F = 2*#E is not assumed: it is proved by double counting.
+
+  The angles are abstract real data constrained only by "the angles of a face
+  sum to pi" and "a face contributes no angle at a vertex it does not contain".
+  Nothing here embeds the surface in Euclidean space, derives the angles from
+  edge lengths, or requires the angles to be positive. See limitations.
+
+# ---------------------------------------------------------------------------
+# Mathematical sources.
+#
+# This is a source-based formalization of a classical result. Nothing here is
+# claimed to be new mathematics. The total-angular-defect theorem for convex
+# polyhedra goes back to Descartes; the version proved here is its standard
+# combinatorial generalization to closed triangulated surfaces.
+# ---------------------------------------------------------------------------
+sources:
+  - title: "Critical Points and Curvature for Embedded Polyhedral Surfaces"
+    authors: ["Thomas Banchoff"]
+    type: "journal article"
+    identifier: "doi:10.1080/00029890.1970.11992523"
+    relationship: background
+    note: >-
+      The Gauss-Bonnet theorem for embedded polyhedral surfaces, with the angle
+      defect as the discrete curvature. The statement formalized here is the
+      combinatorial core of that result.
+
+  - title: "Descartes on Polyhedra: A Study of the De Solidorum Elementis"
+    authors: ["Pasquale Joseph Federico"]
+    type: "book"
+    identifier: "doi:10.1007/978-1-4612-5759-2"
+    relationship: background
+    note: >-
+      The historical source for the total angular defect of a convex polyhedron
+      being 4*pi, which is the tetrahedron corollary here in its oldest form.
+
+  - title: "Discrete Differential Geometry: Integrable Structure"
+    authors: ["Alexander I. Bobenko", "Yuri B. Suris"]
+    type: "book"
+    identifier: "doi:10.1090/gsm/098"
+    relationship: background
+    note: >-
+      Standard reference for the field this statement belongs to.
+
+related_formalizations: []
+
+automation:
+  methods:
+    - method: "ai-agent"
+      model: "Claude Opus 5 (Anthropic)"
+      role: >-
+        Wrote the Lean source in this repository, working in Claude Code under
+        the direction of the author: choosing the Lean formulation of the
+        structure and the statements, finding the proofs, and writing the audit
+        and mutation scripts. The author set the target and reviewed the
+        statements. An earlier version of this development assumed
+        3*#F = 2*#E as a field of the structure; mutation testing showed that
+        the hypothesis "every face has three vertices" was then not used by any
+        proof, and the structure was reworked so that the relation is derived
+        and every field is load-bearing.
+
+review:
+  status: self-assessed
+  reviewers:
+    - name: "Tetsuo Yokoyama"
+  notes: >-
+    No external or independent review has been performed. Every step is checked
+    by Lean; scripts/audit.sh checks the trust conditions below, and
+    scripts/mutation_test.py checks that each field of the structure and each
+    numeric constant in the claimed statements is load-bearing.
+
+known_gaps: []
+
+limitations:
+  - >-
+    No novelty is claimed. The result is classical; see sources. The
+    contribution of this repository is the formalization, not the mathematics.
+  - >-
+    This is the combinatorial form of discrete Gauss-Bonnet. The angles are
+    abstract reals subject only to summing to pi on each face; they are not
+    derived from a metric, the surface is not embedded, and the angles are not
+    required to be positive. A reader looking for "the angle defect of a
+    polyhedron in R^3" will find that this statement covers that case only
+    after one supplies the geometric input separately.
+  - >-
+    "Closed surface" is encoded as "every edge lies in exactly two faces"
+    together with "the edges are exactly the two-element vertex sets occurring
+    in faces". Orientability, connectedness, and the absence of degenerate
+    identifications are neither assumed nor needed: the counting argument does
+    not see them.
+  - >-
+    The Euler characteristic is defined here as #V - #E + #F from the data of
+    the structure. It is not connected to any topological invariant inside this
+    development.
+  - >-
+    The compared theorems depend on propext, Classical.choice and Quot.sound,
+    and on nothing else. There is no sorry outside the four deliberate holes in
+    Challenge.lean, no project-defined axiom, no native_decide, and no unsafe.
+  - >-
+    Challenge.lean states the results but does not prove them; that is the
+    Comparator convention, and Solution.lean supplies the proofs.

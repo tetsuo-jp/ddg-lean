@@ -1,0 +1,7 @@
+import Solution
+#print axioms ClosedTriangulation.card_edges_in_face
+#print axioms ClosedTriangulation.three_mul_card_faces
+#print axioms ClosedTriangulation.sum_defect_eq_card
+#print axioms ClosedTriangulation.sum_defect_eq_two_pi_mul_euler
+#print axioms ClosedTriangulation.card_edges_tetrahedron
+#print axioms ClosedTriangulation.sum_defect_tetrahedron
