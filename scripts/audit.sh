@@ -30,7 +30,7 @@ echo "== 3. no cheats =="
 for m in Solution.lean CotanSolution.lean; do
   grep -nE "sorry|native_decide|unsafe |^axiom " "$m" && fail "$m contains a cheat"
 done
-for pair in Challenge.lean:4 CotanChallenge.lean:4; do
+for pair in Challenge.lean:4 CotanChallenge.lean:7; do
   f=${pair%%:*}; want=${pair##*:}; n=$(grep -c "^  sorry$" "$f")
   [ "$n" = "$want" ] || fail "$f should hold exactly $want deliberate sorry holes, found $n"
 done
@@ -41,7 +41,8 @@ for t in three_mul_card_faces sum_defect_eq_two_pi_mul_euler \
   grep -q "theorem $t" Challenge.lean || fail "$t missing from Challenge.lean"
   grep -q "theorem $t" Solution.lean  || fail "$t missing from Solution.lean"
 done
-for t in gram_two inner_form cot_angle_mul_abs_cross cotan_form; do
+for t in gram_two inner_form cot_angle_mul_abs_cross cotan_form \
+         corner_pair_inner corner_pair linear_precision; do
   grep -q "theorem $t" CotanChallenge.lean || fail "$t missing from CotanChallenge.lean"
   grep -q "theorem $t" CotanSolution.lean  || fail "$t missing from CotanSolution.lean"
 done

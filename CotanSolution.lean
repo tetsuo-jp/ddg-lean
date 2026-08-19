@@ -176,4 +176,89 @@ theorem cotan_form (hp : sarea2 p ≠ 0) (g : E2) :
   linear_combination inner ℝ g (e0 p) ^ 2 * c0 + inner ℝ g (e1 p) ^ 2 * c1
     + inner ℝ g (e2 p) ^ 2 * c2 + h
 
+/-! ### Linear precision of the cotangent Laplacian
+
+The cotangent weights annihilate affine functions at an interior vertex: this is
+property (LIN) of Wardetzky–Mathur–Kälberer–Grinspun for the cotangent
+Laplacian, in the plane.
+-/
+
+/-- Rotation of the plane by a quarter turn, as a linear map. -/
+noncomputable def rotL : E2 →ₗ[ℝ] E2 where
+  toFun a := EuclideanSpace.single 0 (-a 1) + EuclideanSpace.single 1 (a 0)
+  map_add' a b := by
+    ext i; fin_cases i <;>
+      simp [EuclideanSpace.single_apply] <;> ring
+  map_smul' r a := by
+    ext i; fin_cases i <;>
+      simp [EuclideanSpace.single_apply, smul_eq_mul] <;> ring
+
+@[simp] theorem rotL_apply_zero (a : E2) : rotL a 0 = -a 1 := by
+  simp [rotL, EuclideanSpace.single_apply]
+
+@[simp] theorem rotL_apply_one (a : E2) : rotL a 1 = a 0 := by
+  simp [rotL, EuclideanSpace.single_apply]
+
+/-- The cotangent weight of the corner at `c` in the triangle `a b c`. -/
+noncomputable def cotCorner (a b c : E2) : ℝ := Real.cot (angle (a - c) (b - c))
+
+theorem cross_cyc (a b c : E2) : cross (a - c) (b - c) = cross (b - a) (c - a) := by
+  simp only [cross, PiLp.sub_apply]; ring
+
+theorem cross_cyc' (a b c : E2) : cross (a - b) (c - b) = - cross (b - a) (c - a) := by
+  simp only [cross, PiLp.sub_apply]; ring
+
+/-- **The two corner weights of one triangle, before cotangents appear.** -/
+theorem corner_pair_inner (a b c : E2) :
+    inner ℝ (a - c) (b - c) • (b - a) + inner ℝ (a - b) (c - b) • (c - a)
+      = cross (b - a) (c - a) • rotL (b - c) := by
+  ext i
+  fin_cases i <;>
+    simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, PiLp.add_apply,
+      PiLp.smul_apply, PiLp.sub_apply, smul_eq_mul, rotL_apply_zero,
+      rotL_apply_one, inner_expand, cross] <;>
+    ring
+
+/-- **The two corner weights of one positively oriented triangle.**  Their
+weighted edge vectors add up to a quarter turn of the opposite edge. -/
+theorem corner_pair (a b c : E2) (h : 0 < cross (b - a) (c - a)) :
+    cotCorner a b c • (b - a) + cotCorner a c b • (c - a) = rotL (b - c) := by
+  have hS : cross (b - a) (c - a) ≠ 0 := ne_of_gt h
+  have habs1 : |cross (a - c) (b - c)| = cross (b - a) (c - a) := by
+    rw [cross_cyc, abs_of_pos h]
+  have habs2 : |cross (a - b) (c - b)| = cross (b - a) (c - a) := by
+    rw [cross_cyc', abs_neg, abs_of_pos h]
+  have hc : cross (b - a) (c - a) * cotCorner a b c = inner ℝ (a - c) (b - c) := by
+    rw [cotCorner, mul_comm, ← habs1]
+    exact cot_angle_mul_abs_cross _ _ (by rw [cross_cyc]; exact hS)
+  have hb : cross (b - a) (c - a) * cotCorner a c b = inner ℝ (a - b) (c - b) := by
+    rw [cotCorner, mul_comm, ← habs2]
+    exact cot_angle_mul_abs_cross _ _ (by rw [cross_cyc']; exact neg_ne_zero.mpr hS)
+  refine smul_right_injective E2 hS ?_
+  show cross (b - a) (c - a) • (cotCorner a b c • (b - a) + cotCorner a c b • (c - a))
+     = cross (b - a) (c - a) • rotL (b - c)
+  rw [smul_add, smul_smul, smul_smul, hc, hb]
+  exact corner_pair_inner a b c
+
+/-- **Linear precision.**  Around an interior vertex `p` whose one-ring
+`q 0, q 1, …` is traversed so that every triangle `p, q j, q (j+1)` is
+positively oriented, the cotangent weights annihilate the position map:
+summing each triangle's two corner contributions gives zero. -/
+theorem linear_precision {n : ℕ} [NeZero n] (p : E2) (q : ZMod n → E2)
+    (h : ∀ j : ZMod n, 0 < cross (q j - p) (q (j + 1) - p)) :
+    ∑ j : ZMod n, (cotCorner p (q j) (q (j + 1)) • (q j - p)
+                 + cotCorner p (q (j + 1)) (q j) • (q (j + 1) - p)) = 0 := by
+  have step : ∀ j : ZMod n,
+      cotCorner p (q j) (q (j + 1)) • (q j - p)
+        + cotCorner p (q (j + 1)) (q j) • (q (j + 1) - p)
+      = rotL (q j - q (j + 1)) := fun j => corner_pair p (q j) (q (j + 1)) (h j)
+  rw [Finset.sum_congr rfl (fun j _ => step j), ← map_sum]
+  have : ∑ j : ZMod n, (q j - q (j + 1)) = 0 := by
+    rw [Finset.sum_sub_distrib]
+    have : ∑ j : ZMod n, q (j + 1) = ∑ j : ZMod n, q j :=
+      Fintype.sum_equiv (Equiv.addRight (1 : ZMod n)) _ _ (fun _ => rfl)
+    rw [this, sub_self]
+  rw [this, map_zero]
+
 end Cotan
+

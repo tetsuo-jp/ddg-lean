@@ -2,7 +2,7 @@
 version: "v0.4"
 
 project:
-  name: "The cotangent formula for the Dirichlet energy of a triangle"
+  name: "The cotangent formula and linear precision of the cotangent Laplacian"
   description: >-
     For a triangle in the Euclidean plane and an affine function on it, the
     Dirichlet energy 2A * ‖∇u‖^2 equals the sum over the three vertices of
@@ -10,12 +10,20 @@ project:
     uᵢ - uⱼ is the jump of u across the opposite edge.  This is the identity
     behind the cotangent Laplacian of discrete differential geometry.
 
-    Four results are claimed.  gram_two is the geometric core: the Gram matrix
-    of three vectors of the plane is singular.  inner_form is the cotangent
-    identity with each "cot θₖ * 2A" replaced by the inner product of the two
-    edges at vertex k, and needs no hypotheses at all.
+    Seven results are claimed.  gram_two is the geometric core: the Gram
+    matrix of three vectors of the plane is singular.  inner_form is the
+    cotangent identity with each "cot θₖ * 2A" replaced by the inner product of
+    the two edges at vertex k, and needs no hypotheses at all.
     cot_angle_mul_abs_cross is the conversion between the two.  cotan_form is
     the cotangent statement itself, for a nondegenerate triangle.
+
+    The remaining three concern linear precision, which is property (LIN) of
+    Wardetzky-Mathur-Kalberer-Grinspun.  corner_pair_inner and corner_pair say
+    that the two cotangent-weighted edge vectors of one positively oriented
+    triangle add up to a quarter turn of the opposite edge; corner_pair_inner
+    is again the hypothesis-free inner-product version.  linear_precision sums
+    this around a closed one-ring and obtains zero, so the cotangent weights
+    annihilate the position map at an interior vertex of a planar mesh.
   authors:
     - "Tetsuo Yokoyama"
   license: "Apache-2.0"
@@ -24,7 +32,7 @@ project:
 
 classification:
   arxiv: ["math.MG", "math.NA"]
-  msc2020: ["53A70", "65N30", "52B70"]
+  msc2020: ["53A70", "65N30", "52B70", "65N50"]
 
 sources:
   - title: "Computing Discrete Minimal Surfaces and Their Conjugates"
@@ -69,6 +77,12 @@ status:
   scope: >-
     Formalized: the four statements listed in the description, for triangles in
     EuclideanSpace ℝ (Fin 2).
+
+    linear_precision is stated for a one-ring indexed by ZMod n in which every
+    triangle (p, q j, q (j+1)) is positively oriented, and sums the two corner
+    contributions of each incident triangle.  That is the assembly order of the
+    finite element method; it equals the more familiar per-edge grouping by
+    reindexing, but the reindexing is not proved here.
 
     Not formalized: any connection to integration.  The gradient is not
     constructed and no integral is taken.  The vector g in the statements is
@@ -166,6 +180,29 @@ alignment:
       note: >-
         The cotangent statement for a nondegenerate plane triangle, without the
         integral of the cited source.  See fidelity.divergences.
+
+    - source: "Two corner weights of one triangle (inner-product form)"
+      lean: "Cotan.corner_pair_inner"
+      module: "CotanSolution"
+      status: proved
+      note: "Holds with no hypotheses, including for degenerate triangles."
+    - source: "Two corner weights of one positively oriented triangle"
+      lean: "Cotan.corner_pair"
+      module: "CotanSolution"
+      status: proved
+      note: >-
+        The cotangent-weighted edge vectors add up to a quarter turn of the
+        opposite edge.
+    - source: >-
+        Wardetzky-Mathur-Kalberer-Grinspun 2007, property (LIN) for the
+        cotangent Laplacian
+      lean: "Cotan.linear_precision"
+      module: "CotanSolution"
+      status: adapted
+      note: >-
+        Proved in the plane, for a closed one-ring whose triangles are all
+        positively oriented, in the per-triangle assembly order.  See
+        status.scope.
 
 acknowledgements: >-
   Lean 4 and Mathlib, and the Lean FRO's Comparator, on which the mechanical

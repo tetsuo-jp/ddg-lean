@@ -22,7 +22,7 @@ Nothing here is new mathematics; the result is classical (Descartes, Banchoff).
 This repository is a formalization, prepared for the
 [Palomar registry](https://palomar-registry.org/).
 
-## 2. The cotangent formula for the Dirichlet energy of a triangle
+## 2. The cotangent formula, and linear precision of the cotangent Laplacian
 
 ```lean
 theorem cotan_form (hp : sarea2 p ≠ 0) (g : E2) :
@@ -39,7 +39,21 @@ identity with each `cot θₖ * 2A` replaced by an inner product of edges, and
 needs no hypotheses at all.  The whole geometric content is `gram_two`: the
 Gram matrix of three vectors of the plane is singular.
 
-Also classical (Pinkall–Polthier, Duffin, MacNeal).
+Summing this around a closed one-ring gives **linear precision**, property
+(LIN) of Wardetzky–Mathur–Kälberer–Grinspun:
+
+```lean
+theorem linear_precision {n : ℕ} [NeZero n] (p : E2) (q : ZMod n → E2)
+    (h : ∀ j : ZMod n, 0 < cross (q j - p) (q (j + 1) - p)) :
+    ∑ j : ZMod n, (cotCorner p (q j) (q (j + 1)) • (q j - p)
+                 + cotCorner p (q (j + 1)) (q j) • (q (j + 1) - p)) = 0
+```
+
+The proof is one identity per triangle plus a telescoping sum: each triangle's
+two weighted edge vectors add up to a quarter turn of the opposite edge, and the
+quarter turns cancel because the ring closes.
+
+Also classical (Pinkall–Polthier, Duffin, MacNeal, Wardetzky et al.).
 
 ## Layout
 
@@ -81,9 +95,16 @@ Lean `v4.31.0`, Mathlib pinned in `lake-manifest.json`.
 3. No `sorry`, `native_decide`, `unsafe` or project-defined `axiom` in either
    solution module; exactly four deliberate `sorry` holes in each challenge.
 4. The claimed theorems appear in both modules of each pair.
-5. **Mutation test**: twenty single-token changes to the structures' fields and
-   to the constants in the claimed statements each break the build, and three
-   harmless edits do not.
+5. **Mutation test**: twenty-four single-token changes to the structures'
+   fields and to the constants in the claimed statements each break the build,
+   and three harmless edits do not.
+
+The mutation scripts are crash-safe: they copy the source aside before the
+first mutation, restore it on every exit path including `SIGTERM`, and recover
+at start-up if a previous run was killed before it could restore.  This is not
+hypothetical.  A ten-minute timeout once killed the audit mid-mutation and left
+two files mutated, after which the next run reported failures that had nothing
+to do with the code.
 
 Point 5 is there because a correct proof of a badly stated theorem still passes
 points 1–4.  An earlier version of this development assumed `3·#F = 2·#E` as a

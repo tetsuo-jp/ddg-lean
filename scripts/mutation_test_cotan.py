@@ -11,13 +11,46 @@ without it, because at a degenerate triangle every interior angle is 0, pi or
 pi/2 and Lean's `Real.cot` is 0 at all three (`x / 0 = 0`).  The hypothesis is
 kept deliberately.
 """
+import atexit
 import os
 import pathlib
+import signal
 import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "CotanSolution.lean"
+
+# --- crash safety -----------------------------------------------------------
+# A killed run must not leave a mutation in the working tree.  It happened: a
+# ten-minute timeout killed this script mid-mutation and left two files mutated,
+# after which the next audit reported failures that had nothing to do with the
+# code.  The original is copied aside before the first mutation, restored on
+# every exit path including SIGTERM and SIGINT, and recovered at start-up if a
+# previous run was killed before it could restore.
+BACKUP = SRC.with_suffix(SRC.suffix + ".mutation-backup")
+
+
+def _restore() -> None:
+    if BACKUP.exists():
+        SRC.write_text(BACKUP.read_text())
+        BACKUP.unlink()
+
+
+def _on_signal(signum, _frame):
+    _restore()
+    raise SystemExit(128 + signum)
+
+
+def install_guards() -> None:
+    if BACKUP.exists():
+        print(f"recovering {SRC.name} from {BACKUP.name}: a previous run was killed")
+        _restore()
+    BACKUP.write_text(SRC.read_text())
+    atexit.register(_restore)
+    for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(s, _on_signal)
+
 
 MUTATIONS = [
     ("gram_two coefficient 2 -> 3",
@@ -42,6 +75,18 @@ MUTATIONS = [
     ("inner_form exponent 2 -> 3",
      "* inner ℝ g (e0 p) ^ 2\n    - inner ℝ (e0 p) (e2 p)",
      "* inner ℝ g (e0 p) ^ 3\n    - inner ℝ (e0 p) (e2 p)"),
+    ("quarter turn rotL loses a sign",
+     "toFun a := EuclideanSpace.single 0 (-a 1) + EuclideanSpace.single 1 (a 0)",
+     "toFun a := EuclideanSpace.single 0 (a 1) + EuclideanSpace.single 1 (a 0)"),
+    ("corner weight taken at the wrong corner",
+     "noncomputable def cotCorner (a b c : E2) : \u211d := Real.cot (angle (a - c) (b - c))",
+     "noncomputable def cotCorner (a b c : E2) : \u211d := Real.cot (angle (a - b) (b - c))"),
+    ("linear precision one-ring shifted by two",
+     "cotCorner p (q j) (q (j + 1)) \u2022 (q j - p)\n                 + cotCorner p (q (j + 1)) (q j) \u2022 (q (j + 1) - p)) = 0 := by",
+     "cotCorner p (q j) (q (j + 2)) \u2022 (q j - p)\n                 + cotCorner p (q (j + 1)) (q j) \u2022 (q (j + 1) - p)) = 0 := by"),
+    ("corner_pair_inner right side loses the cross factor",
+     "= cross (b - a) (c - a) \u2022 rotL (b - c) := by",
+     "= rotL (b - c) := by"),
     ("nondegeneracy hypothesis weakened",
      "theorem cotan_form (hp : sarea2 p ≠ 0) (g : E2) :",
      "theorem cotan_form (hp : sarea2 p ≠ 0 ∨ True) (g : E2) :"),
@@ -61,6 +106,7 @@ def build() -> bool:
 
 
 def main() -> int:
+    install_guards()
     original = SRC.read_text()
     failures = []
     try:
@@ -84,6 +130,7 @@ def main() -> int:
                 failures.append(f"harmless edit broke the build: {name}")
     finally:
         SRC.write_text(original)
+        _restore()
 
     if failures:
         print("\nMUTATION TEST FAILED")

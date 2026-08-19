@@ -84,4 +84,42 @@ theorem cotan_form (hp : sarea2 p ≠ 0) (g : E2) :
       = |sarea2 p| * ‖g‖ ^ 2 :=
   sorry
 
+
+/-! ### Linear precision of the cotangent Laplacian -/
+
+/-- Rotation of the plane by a quarter turn, as a linear map. -/
+noncomputable def rotL : E2 →ₗ[ℝ] E2 where
+  toFun a := EuclideanSpace.single 0 (-a 1) + EuclideanSpace.single 1 (a 0)
+  map_add' a b := by
+    ext i; fin_cases i <;>
+      simp [EuclideanSpace.single_apply] <;> ring
+  map_smul' r a := by
+    ext i; fin_cases i <;>
+      simp [EuclideanSpace.single_apply, smul_eq_mul] <;> ring
+
+/-- The cotangent weight of the corner at `c` in the triangle `a b c`. -/
+noncomputable def cotCorner (a b c : E2) : ℝ := Real.cot (angle (a - c) (b - c))
+
+/-- **The two corner weights of one triangle, before cotangents appear.** -/
+theorem corner_pair_inner (a b c : E2) :
+    inner ℝ (a - c) (b - c) • (b - a) + inner ℝ (a - b) (c - b) • (c - a)
+      = cross (b - a) (c - a) • rotL (b - c) :=
+  sorry
+
+/-- **The two corner weights of one positively oriented triangle.**  Their
+weighted edge vectors add up to a quarter turn of the opposite edge. -/
+theorem corner_pair (a b c : E2) (h : 0 < cross (b - a) (c - a)) :
+    cotCorner a b c • (b - a) + cotCorner a c b • (c - a) = rotL (b - c) :=
+  sorry
+
+/-- **Linear precision.**  Around an interior vertex `p` whose one-ring
+`q 0, q 1, …` is traversed so that every triangle `p, q j, q (j+1)` is
+positively oriented, the cotangent weights annihilate the position map:
+summing each triangle's two corner contributions gives zero. -/
+theorem linear_precision {n : ℕ} [NeZero n] (p : E2) (q : ZMod n → E2)
+    (h : ∀ j : ZMod n, 0 < cross (q j - p) (q (j + 1) - p)) :
+    ∑ j : ZMod n, (cotCorner p (q j) (q (j + 1)) • (q j - p)
+                 + cotCorner p (q (j + 1)) (q j) • (q (j + 1) - p)) = 0 :=
+  sorry
+
 end Cotan

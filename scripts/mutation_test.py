@@ -7,13 +7,46 @@ harmless edits must leave it passing.  A mutation that passes means the
 hypothesis it touches is dead weight, which is a defect in the *statement* even
 when every proof is correct.
 """
+import atexit
 import os
 import pathlib
+import signal
 import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "Solution.lean"
+
+# --- crash safety -----------------------------------------------------------
+# A killed run must not leave a mutation in the working tree.  It happened: a
+# ten-minute timeout killed this script mid-mutation and left two files mutated,
+# after which the next audit reported failures that had nothing to do with the
+# code.  The original is copied aside before the first mutation, restored on
+# every exit path including SIGTERM and SIGINT, and recovered at start-up if a
+# previous run was killed before it could restore.
+BACKUP = SRC.with_suffix(SRC.suffix + ".mutation-backup")
+
+
+def _restore() -> None:
+    if BACKUP.exists():
+        SRC.write_text(BACKUP.read_text())
+        BACKUP.unlink()
+
+
+def _on_signal(signum, _frame):
+    _restore()
+    raise SystemExit(128 + signum)
+
+
+def install_guards() -> None:
+    if BACKUP.exists():
+        print(f"recovering {SRC.name} from {BACKUP.name}: a previous run was killed")
+        _restore()
+    BACKUP.write_text(SRC.read_text())
+    atexit.register(_restore)
+    for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(s, _on_signal)
+
 
 MUTATIONS = [
     ("tetrahedron defect 4pi -> 3pi",
@@ -65,6 +98,7 @@ def build() -> bool:
 
 
 def main() -> int:
+    install_guards()
     original = SRC.read_text()
     failures = []
     try:
@@ -88,6 +122,7 @@ def main() -> int:
                 failures.append(f"harmless edit broke the build: {name}")
     finally:
         SRC.write_text(original)
+        _restore()
 
     if failures:
         print("\nMUTATION TEST FAILED")
