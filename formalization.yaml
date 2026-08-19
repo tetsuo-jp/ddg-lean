@@ -1,125 +1,183 @@
-version: "0.3"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
 
 project:
   name: "Discrete Gauss–Bonnet for closed triangulated surfaces"
+  description: >-
+    The combinatorial form of the discrete Gauss–Bonnet theorem: for a finite
+    closed triangulated surface carrying angle data, the sum over vertices of
+    the angle defect equals 2*pi times the Euler characteristic #V - #E + #F.
+    The relation 3*#F = 2*#E is not assumed; it is proved by double counting
+    from "every face has three vertices" and "every edge lies in exactly two
+    faces". The tetrahedron is derived as an instance: four triangular faces
+    force six edges, and the total defect is 4*pi. The development isolates how
+    little is needed for the theorem — beyond "the angles of a face sum to pi",
+    everything is finite bookkeeping.
   authors:
-    - name: "Tetsuo Yokoyama"
+    - "Tetsuo Yokoyama"
   license: "Apache-2.0"
   responsible_maintainers:
-    - name: "Tetsuo Yokoyama"
-
-repository:
-  role: substantive-development
+    - "Tetsuo Yokoyama"
 
 classification:
-  arxiv: [math.MG, math.CO]
+  arxiv: ["math.MG", "math.CO"]
   msc2020: ["53A70", "52B70", "52B05", "05C10"]
 
-status: complete
-fidelity: faithful
-scope: >-
-  The combinatorial form of the theorem, in full generality for the structure
-  defined here: for any finite closed triangulated surface with angle data, the
-  sum over vertices of the angle defect equals 2*pi times the Euler
-  characteristic #V - #E + #F. The tetrahedron (4*pi) is derived as an
-  instance, together with the fact that four triangular faces force six edges.
-  The relation 3*#F = 2*#E is not assumed: it is proved by double counting.
-
-  The angles are abstract real data constrained only by "the angles of a face
-  sum to pi" and "a face contributes no angle at a vertex it does not contain".
-  Nothing here embeds the surface in Euclidean space, derives the angles from
-  edge lengths, or requires the angles to be positive. See limitations.
-
-# ---------------------------------------------------------------------------
-# Mathematical sources.
-#
-# This is a source-based formalization of a classical result. Nothing here is
-# claimed to be new mathematics. The total-angular-defect theorem for convex
-# polyhedra goes back to Descartes; the version proved here is its standard
-# combinatorial generalization to closed triangulated surfaces.
-# ---------------------------------------------------------------------------
 sources:
   - title: "Critical Points and Curvature for Embedded Polyhedral Surfaces"
-    authors: ["Thomas Banchoff"]
-    type: "journal article"
-    identifier: "doi:10.1080/00029890.1970.11992523"
-    relationship: background
+    authors:
+      - "Thomas Banchoff"
+    id: "doi:10.1080/00029890.1970.11992523"
+    type: "article"
+    location: "The American Mathematical Monthly 77 (1970) 475–485"
+    relationship: independently-proves
+    license: "unknown"
+    author_endorsement: "not-contacted"
     note: >-
-      The Gauss-Bonnet theorem for embedded polyhedral surfaces, with the angle
-      defect as the discrete curvature. The statement formalized here is the
-      combinatorial core of that result.
+      The Gauss–Bonnet theorem for polyhedral surfaces with the angle defect as
+      discrete curvature. The Lean proof here was written directly rather than
+      by following any particular written argument, so the relationship is
+      independently-proves; the argument is nevertheless the standard double
+      count and no priority or novelty is claimed. The statement proved here is
+      the combinatorial core of the cited result, without the embedding.
 
   - title: "Descartes on Polyhedra: A Study of the De Solidorum Elementis"
-    authors: ["Pasquale Joseph Federico"]
+    authors:
+      - "Pasquale Joseph Federico"
+    id: "doi:10.1007/978-1-4612-5759-2"
     type: "book"
-    identifier: "doi:10.1007/978-1-4612-5759-2"
     relationship: background
+    license: "unknown"
+    author_endorsement: "n/a"
     note: >-
       The historical source for the total angular defect of a convex polyhedron
       being 4*pi, which is the tetrahedron corollary here in its oldest form.
 
   - title: "Discrete Differential Geometry: Integrable Structure"
-    authors: ["Alexander I. Bobenko", "Yuri B. Suris"]
+    authors:
+      - "Alexander I. Bobenko"
+      - "Yuri B. Suris"
+    id: "doi:10.1090/gsm/098"
     type: "book"
-    identifier: "doi:10.1090/gsm/098"
     relationship: background
+    license: "unknown"
+    author_endorsement: "n/a"
     note: >-
       Standard reference for the field this statement belongs to.
 
 related_formalizations: []
 
+status:
+  scope: >-
+    Formalized in full generality for the structure defined in Challenge.lean:
+    the total angle defect equals 2*pi times #V - #E + #F, the double-counting
+    identity 3*#F = 2*#E, and the two tetrahedron instances (#E = 6 and total
+    defect 4*pi).
+
+    Not formalized: any connection to Euclidean geometry or to topology. The
+    angles are abstract real data constrained only by summing to pi on each
+    face and vanishing off the face; they are not derived from edge lengths or
+    from an embedding, and they are not required to be positive. The Euler
+    characteristic is defined here as #V - #E + #F from the data of the
+    structure and is not shown to be a topological invariant. Orientability and
+    connectedness are neither assumed nor needed — the counting argument does
+    not see them. "Closed surface" is encoded solely as "every edge lies in
+    exactly two faces" together with "the edges are exactly the two-element
+    vertex sets occurring in faces".
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
 automation:
   methods:
-    - method: "ai-agent"
-      model: "Claude Opus 5 (Anthropic)"
-      role: >-
-        Wrote the Lean source in this repository, working in Claude Code under
-        the direction of the author: choosing the Lean formulation of the
-        structure and the statements, finding the proofs, and writing the audit
-        and mutation scripts. The author set the target and reviewed the
-        statements. An earlier version of this development assumed
-        3*#F = 2*#E as a field of the structure; mutation testing showed that
-        the hypothesis "every face has three vertices" was then not used by any
-        proof, and the structure was reworked so that the relation is derived
-        and every field is load-bearing.
+    - method: "agent"
+      models: ["Claude Opus 5 (Anthropic)"]
+      framework: "Claude Code"
+      tool_setup: >-
+        The agent wrote all Lean source in this repository, together with
+        scripts/audit.sh and scripts/mutation_test.py, iterating against
+        `lake build`. The author set the target, chose to derive rather than
+        assume 3*#F = 2*#E after the mutation test exposed a dead hypothesis,
+        and reviewed the statements. Mathlib is pinned in lake-manifest.json;
+        no external solver or proof-search service was used.
+      cost:
+        wall_time: "about one hour of elapsed session time"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: >-
+        Ordinary interactive instruction in Japanese: state the theorem, build,
+        read the errors, repair. The one substantive intervention was a
+        methodological one — requiring that every field of the structure be
+        shown load-bearing by mutation testing before submission.
+  spend_usd: "subscription-based"
+  notes: >-
+    Human-directed, machine-written. Every proof step is checked by Lean.
+    scripts/audit.sh enforces five conditions and fails closed: the oleans are
+    produced; every claimed theorem depends on exactly propext,
+    Classical.choice and Quot.sound; Solution.lean contains no sorry,
+    native_decide, unsafe or project-defined axiom and Challenge.lean contains
+    exactly four deliberate holes; the four claimed theorems appear in both
+    modules; and the mutation test passes.
+
+    The mutation test is the part worth flagging to a reviewer. A correct proof
+    of a badly stated theorem passes every other check, so scripts/mutation_test.py
+    perturbs each field of the structure and each constant in the claimed
+    statements — eleven mutations, each of which must break the build — and two
+    harmless edits, which must not. The first version of this development
+    assumed 3*#F = 2*#E as a field of the structure; the mutation test then
+    showed that "every face has three vertices" was used by no proof at all.
+    The structure was reworked so that the relation is derived and every field
+    is load-bearing.
+
+fidelity:
+  divergences: >-
+    The cited source proves Gauss–Bonnet for polyhedral surfaces embedded in
+    Euclidean space; this development proves only the combinatorial identity,
+    with angles as abstract data and the Euler characteristic as a defined
+    quantity rather than a topological invariant. A reader wanting "the angle
+    defect of a polyhedron in R^3" obtains it from this statement only after
+    supplying the geometric input separately. No other divergence is known.
 
 review:
   status: self-assessed
   reviewers:
-    - name: "Tetsuo Yokoyama"
+    - "Tetsuo Yokoyama"
   notes: >-
-    No external or independent review has been performed. Every step is checked
-    by Lean; scripts/audit.sh checks the trust conditions below, and
-    scripts/mutation_test.py checks that each field of the structure and each
-    numeric constant in the claimed statements is load-bearing.
+    No external or independent review has been performed, and no mathematician
+    other than the author has read the Lean source. The statements in
+    Challenge.lean were read for fidelity by the author; the mutation test
+    described above is the mechanical check that they are not vacuous. Every
+    proof step is checked by Lean.
 
-known_gaps: []
+alignment:
+  namespace: "ClosedTriangulation"
+  statements:
+    - source: "Face–edge double count (standard)"
+      lean: "ClosedTriangulation.three_mul_card_faces"
+      module: "Solution"
+      status: proved
+      note: >-
+        3*#F = 2*#E, derived from card_verts and two_faces rather than assumed.
+    - source: "Banchoff 1970, Gauss–Bonnet for polyhedral surfaces (combinatorial core)"
+      lean: "ClosedTriangulation.sum_defect_eq_two_pi_mul_euler"
+      module: "Solution"
+      status: adapted
+      note: >-
+        Proved for the abstract angle structure, without the Euclidean
+        embedding of the cited statement. See fidelity.divergences.
+    - source: "Tetrahedron: four triangular faces force six edges"
+      lean: "ClosedTriangulation.card_edges_tetrahedron"
+      module: "Solution"
+      status: proved
+      note: "Immediate from three_mul_card_faces."
+    - source: "Descartes: total angular defect of a tetrahedron is 4*pi"
+      lean: "ClosedTriangulation.sum_defect_tetrahedron"
+      module: "Solution"
+      status: adapted
+      note: >-
+        The abstract-structure form of the classical statement; convexity and
+        the embedding play no role here.
 
-limitations:
-  - >-
-    No novelty is claimed. The result is classical; see sources. The
-    contribution of this repository is the formalization, not the mathematics.
-  - >-
-    This is the combinatorial form of discrete Gauss-Bonnet. The angles are
-    abstract reals subject only to summing to pi on each face; they are not
-    derived from a metric, the surface is not embedded, and the angles are not
-    required to be positive. A reader looking for "the angle defect of a
-    polyhedron in R^3" will find that this statement covers that case only
-    after one supplies the geometric input separately.
-  - >-
-    "Closed surface" is encoded as "every edge lies in exactly two faces"
-    together with "the edges are exactly the two-element vertex sets occurring
-    in faces". Orientability, connectedness, and the absence of degenerate
-    identifications are neither assumed nor needed: the counting argument does
-    not see them.
-  - >-
-    The Euler characteristic is defined here as #V - #E + #F from the data of
-    the structure. It is not connected to any topological invariant inside this
-    development.
-  - >-
-    The compared theorems depend on propext, Classical.choice and Quot.sound,
-    and on nothing else. There is no sorry outside the four deliberate holes in
-    Challenge.lean, no project-defined axiom, no native_decide, and no unsafe.
-  - >-
-    Challenge.lean states the results but does not prove them; that is the
-    Comparator convention, and Solution.lean supplies the proofs.
+acknowledgements: >-
+  Lean 4 and Mathlib, and the Lean FRO's Comparator, on which the mechanical
+  checks in this repository depend.
