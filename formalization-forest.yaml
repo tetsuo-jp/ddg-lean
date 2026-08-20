@@ -19,8 +19,14 @@ project:
     exactly what makes the rescaling consistent: on a tree the scale propagates
     from the root outwards, while a cycle would impose a closing condition.
 
-    One theorem is claimed, exists_good_weights.  The weights are existentially
-    quantified in it, so the statement mentions only the two structures.
+    Three theorems are claimed.  exists_good_weights is the general statement;
+    the weights are existentially quantified in it, so it mentions only the two
+    structures.  exists_good_weights_of_no_edge and
+    exists_good_weights_of_one_edge instantiate the cases where the interior
+    vertices span no edge and exactly one edge.  Those two are what a
+    triangulation of at most five points needs, and their statements mention no
+    forest at all, so for that case the development appeals to no unformalised
+    graph theory.
   authors:
     - "Tetsuo Yokoyama"
   license: "Apache-2.0"
@@ -72,11 +78,13 @@ status:
     every neighbour, balance every vertex, have positive row sums, and agree
     from both ends of every forest edge.
 
-    Not formalized, and important for a reader to know.  (1) The forest
-    hypothesis is taken in rooted form.  Every finite forest admits such a
-    structure, by picking a root in each component and letting the rank be the
-    distance to it, but that step is standard graph theory and is not proved
-    here.  (2) The geometric fact that an interior vertex of a triangulation
+    Not formalized, and important for a reader to know.  (1) In the general
+    theorem the forest hypothesis is taken in rooted form.  Every finite forest
+    admits such a structure, by picking a root in each component and letting the
+    rank be the distance to it, but that step is standard graph theory and is
+    not proved here.  The two corollaries do not have this gap: they build the
+    rooted structure explicitly, so "at most one interior edge suffices" is
+    formalised without any appeal to graph theory.  (2) The geometric fact that an interior vertex of a triangulation
     lies in the interior of the convex hull of its neighbours, which is what
     supplies Bary, is assumed rather than derived: no triangulation, convex
     hull, or planarity appears in this development.  (3) Nothing here converts
@@ -146,6 +154,19 @@ alignment:
       note: >-
         The four conclusions are (POS), (LIN), the nondegeneracy of Wardetzky et
         al., and (SYM) across interior edges.
+    - source: "No interior edge"
+      lean: "LapForest.exists_good_weights_of_no_edge"
+      module: "ForestSolution"
+      status: proved
+      note: "Every vertex is scaled independently."
+    - source: "At most one interior edge (the case of at most five points)"
+      lean: "LapForest.exists_good_weights_of_one_edge"
+      module: "ForestSolution"
+      status: proved
+      note: >-
+        The two ends of the single interior edge agree on its weight.  The
+        rooted structure is built explicitly, so this statement is free of the
+        gap described in status.scope item (1).
 
 acknowledgements: >-
   Lean 4 and Mathlib, and the Lean FRO's Comparator, on which the mechanical

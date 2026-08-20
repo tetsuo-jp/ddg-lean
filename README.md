@@ -75,7 +75,10 @@ consistent, since a cycle would impose a closing condition.
 
 ⚠ The forest hypothesis is taken in **rooted** form, and the geometric fact
 supplying the barycentric data is assumed rather than derived.  See
-`formalization-forest.yaml` for the full list of gaps.  **No priority is
+`formalization-forest.yaml` for the full list of gaps.  Two corollaries
+instantiate the cases with no interior edge and with one interior edge, which is
+where a triangulation of at most five points sits; those need no graph theory at
+all.  **No priority is
 claimed**: the argument is elementary and may well be folklore.
 
 ## Layout
@@ -119,7 +122,7 @@ Lean `v4.31.0`, Mathlib pinned in `lake-manifest.json`.
 3. No `sorry`, `native_decide`, `unsafe` or project-defined `axiom` in either
    solution module; exactly four deliberate `sorry` holes in each challenge.
 4. The claimed theorems appear in both modules of each pair.
-5. **Mutation test**: thirty-three single-token changes to the structures'
+5. **Mutation test**: thirty-six single-token changes to the structures'
    fields and to the constants in the claimed statements each break the build,
    and four harmless edits do not.
 

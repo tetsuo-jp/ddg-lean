@@ -115,6 +115,34 @@ theorem scale_edge {c : V → V → ℝ} {v p : V} (hc : 0 < c p v)
   congr 1
   linarith
 
+/-- The forest with no edges at all: every vertex is a root. -/
+def empty (V : Type) : RootedForest V where
+  parent _ := none
+  rk _ := 0
+  rk_lt := by intro v p h; simp at h
+
+@[simp] theorem empty_parent (v : V) : (empty V).parent v = none := rfl
+
+variable [DecidableEq V]
+
+/-- The forest consisting of the single edge from `b` to `a`, with `a` the child. -/
+def singleEdge {a b : V} (hab : a ≠ b) : RootedForest V where
+  parent v := if v = a then some b else none
+  rk v := if v = a then 1 else 0
+  rk_lt := by
+    intro v p h
+    split at h
+    · rename_i hv
+      subst hv
+      have hbp : b = p := Option.some.inj h
+      subst hbp
+      simp [Ne.symm hab]
+    · exact absurd h (by simp)
+
+@[simp] theorem singleEdge_parent_child {a b : V} (hab : a ≠ b) :
+    (singleEdge hab).parent a = some b := by simp [singleEdge]
+
+
 end RootedForest
 
 /-! ## Barycentric data -/
@@ -191,5 +219,35 @@ theorem exists_good_weights {P : V → E} {N : V → Finset V}
       (∀ v p, p ∈ N v → v ∈ N p → F.parent v = some p → w p v = w v p) :=
   ⟨B.w F, fun _ _ h => B.w_pos F h, B.w_bal F, fun _ h => B.w_sum_pos F h,
     fun _ _ hv hp h => B.w_symm F hv hp h⟩
+
+/-! ## The cases that a mesh with at most two interior vertices needs
+
+A triangulation of at most five points has at most two interior vertices, so the
+subgraph they span has at most one edge.  Those two cases are instantiated here,
+so that the statement "at most one interior edge suffices" needs no graph theory
+at all. -/
+
+/-- **No interior edge.**  Each vertex is scaled on its own. -/
+theorem exists_good_weights_of_no_edge {P : V → E} {N : V → Finset V} (B : Bary P N) :
+    ∃ w : V → V → ℝ,
+      (∀ u j, j ∈ N u → 0 < w u j) ∧
+      (∀ u, ∑ j ∈ N u, w u j • (P j - P u) = 0) ∧
+      (∀ u, (N u).Nonempty → 0 < ∑ j ∈ N u, w u j) :=
+  ⟨B.w (RootedForest.empty V), fun _ _ h => B.w_pos _ h, B.w_bal _,
+    fun _ h => B.w_sum_pos _ h⟩
+
+/-- **One interior edge.**  The two ends of that edge agree on its weight.  This
+is the case a triangulation of at most five points is in. -/
+theorem exists_good_weights_of_one_edge [DecidableEq V] {P : V → E} {N : V → Finset V}
+    (B : Bary P N) {a b : V} (hab : a ≠ b) (hb : b ∈ N a) (ha : a ∈ N b) :
+    ∃ w : V → V → ℝ,
+      (∀ u j, j ∈ N u → 0 < w u j) ∧
+      (∀ u, ∑ j ∈ N u, w u j • (P j - P u) = 0) ∧
+      (∀ u, (N u).Nonempty → 0 < ∑ j ∈ N u, w u j) ∧
+      w b a = w a b :=
+  ⟨B.w (RootedForest.singleEdge hab), fun _ _ h => B.w_pos _ h, B.w_bal _,
+    fun _ h => B.w_sum_pos _ h,
+    B.w_symm _ hb ha (RootedForest.singleEdge_parent_child hab)⟩
+
 
 end LapForest

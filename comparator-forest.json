@@ -2,7 +2,13 @@
   "challenge_module": "ForestChallenge",
   "solution_module": "ForestSolution",
   "theorem_names": [
-    "LapForest.exists_good_weights"
+    "LapForest.exists_good_weights",
+    "LapForest.exists_good_weights_of_no_edge",
+    "LapForest.exists_good_weights_of_one_edge"
   ],
-  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
 }

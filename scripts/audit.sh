@@ -31,7 +31,7 @@ echo "== 3. no cheats =="
 for m in Solution.lean CotanSolution.lean ForestSolution.lean; do
   grep -nE "sorry|native_decide|unsafe |^axiom " "$m" && fail "$m contains a cheat"
 done
-for pair in Challenge.lean:4 CotanChallenge.lean:7 ForestChallenge.lean:1; do
+for pair in Challenge.lean:4 CotanChallenge.lean:7 ForestChallenge.lean:3; do
   f=${pair%%:*}; want=${pair##*:}; n=$(grep -c "^  sorry$" "$f")
   [ "$n" = "$want" ] || fail "$f should hold exactly $want deliberate sorry holes, found $n"
 done

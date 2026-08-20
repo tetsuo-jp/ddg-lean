@@ -65,4 +65,23 @@ theorem exists_good_weights {P : V → E} {N : V → Finset V}
       (∀ v p, p ∈ N v → v ∈ N p → F.parent v = some p → w p v = w v p) :=
   sorry
 
+/-- **No interior edge.**  Each vertex is scaled on its own. -/
+theorem exists_good_weights_of_no_edge {P : V → E} {N : V → Finset V} (B : Bary P N) :
+    ∃ w : V → V → ℝ,
+      (∀ u j, j ∈ N u → 0 < w u j) ∧
+      (∀ u, ∑ j ∈ N u, w u j • (P j - P u) = 0) ∧
+      (∀ u, (N u).Nonempty → 0 < ∑ j ∈ N u, w u j) :=
+  sorry
+
+/-- **One interior edge.**  The two ends of that edge agree on its weight.  This
+is the case a triangulation of at most five points is in. -/
+theorem exists_good_weights_of_one_edge [DecidableEq V] {P : V → E} {N : V → Finset V}
+    (B : Bary P N) {a b : V} (hab : a ≠ b) (hb : b ∈ N a) (ha : a ∈ N b) :
+    ∃ w : V → V → ℝ,
+      (∀ u j, j ∈ N u → 0 < w u j) ∧
+      (∀ u, ∑ j ∈ N u, w u j • (P j - P u) = 0) ∧
+      (∀ u, (N u).Nonempty → 0 < ∑ j ∈ N u, w u j) ∧
+      w b a = w a b :=
+  sorry
+
 end LapForest
